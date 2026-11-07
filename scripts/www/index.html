@@ -3,238 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>粉粉空间</title>
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI','PingFang SC',Roboto,sans-serif; -webkit-tap-highlight-color:transparent; }
-  body { background:#ffe4e9; display:flex; justify-content:center; align-items:center; min-height:100vh; padding:8px; }
-  .app {
-    max-width:420px; width:100%; height:780px; background:#fff9fb;
-    border-radius:32px; box-shadow:0 20px 35px rgba(233,150,170,.25);
-    overflow:hidden; display:flex; flex-direction:column; border:1px solid #ffe2e9; position:relative;
-  }
-
-  /* ========== 页面容器 ========== */
-  .page { display:none; flex-direction:column; height:100%; overflow:hidden; }
-  .page.active { display:flex; }
-  .page-body { flex:1; overflow-y:auto; padding:12px 16px 16px; }
-
-  /* ========== 通用顶部 ========== */
-  .header { display:flex; justify-content:space-between; align-items:center; padding:16px 20px 10px; background:#fff9fb; border-bottom:1px solid #ffd9e2; flex-shrink:0; }
-  .header h1 { font-size:20px; font-weight:600; color:#b35f7b; letter-spacing:.5px; }
-  .header-actions { display:flex; gap:8px; align-items:center; }
-  .icon-btn {
-    background:#ffd0dc; border:none; min-width:40px; height:40px; border-radius:20px;
-    padding:0 12px; font-size:14px; color:#b35f7b; display:flex; justify-content:center; align-items:center;
-    cursor:pointer; box-shadow:0 4px 10px rgba(255,160,180,.2); transition:.2s; font-weight:500;
-  }
-  .icon-btn:hover { background:#ffb8cb; }
-  .icon-btn:active { transform:scale(.96); }
-
-  /* ========== 底部导航 ========== */
-  .bottom-nav {
-    display:flex; height:62px; background:#fff1f5; border-top:1px solid #ffd9e2;
-    flex-shrink:0; padding-bottom:env(safe-area-inset-bottom);
-  }
-  .nav-item {
-    flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center;
-    gap:3px; cursor:pointer; color:#c9a9b6; transition:.15s; user-select:none;
-  }
-  .nav-item.active { color:#b35f7b; }
-  .nav-icon { width:22px; height:22px; display:flex; align-items:center; justify-content:center; }
-  .nav-icon svg { width:100%; height:100%; }
-  .nav-label { font-size:11px; font-weight:500; }
-
-  /* ========== 对话页（复用原有逻辑精简版） ========== */
-  .list-container { display:flex; flex-direction:column; gap:10px; }
-  .chat-list-item {
-    display:flex; align-items:center; gap:14px; background:#ffeef3; padding:14px 18px;
-    border-radius:28px; cursor:pointer; border:1px solid #ffe2ec;
-    box-shadow:0 2px 5px rgba(255,210,220,.3); transition:.15s;
-  }
-  .chat-list-item:hover { background:#ffe3ec; }
-  .list-colors { display:flex; flex-shrink:0; }
-  .list-color-dot { width:24px; height:24px; border-radius:50%; border:2px solid white; margin-left:-8px; box-shadow:0 2px 6px rgba(0,0,0,.08); }
-  .list-color-dot:first-child { margin-left:0; }
-  .list-info { flex:1; min-width:0; }
-  .list-title { font-weight:600; font-size:16px; color:#6b3e4c; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .list-badge { font-size:12px; color:#b98a99; margin-top:2px; }
-  .empty-tip { color:#d9a7b6; text-align:center; padding:40px 20px; font-size:15px; background:#fff4f7; border-radius:28px; margin-top:20px; border:1px dashed #ffc1d2; }
-
-  /* 聊天详情 */
-  .chat-detail { display:none; flex-direction:column; height:100%; }
-  .chat-detail.active { display:flex; }
-  .chat-header { display:flex; align-items:center; padding:12px 14px; background:#fff1f5; border-bottom:1px solid #ffd9e2; gap:10px; }
-  .back-btn { background:none; border:none; font-size:24px; color:#b35f7b; cursor:pointer; width:38px; height:38px; display:flex; align-items:center; justify-content:center; border-radius:50%; flex-shrink:0; }
-  .back-btn:hover { background:#ffe2ea; }
-  .chat-title { font-weight:600; font-size:16px; color:#6b3e4c; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .chat-header-actions { display:flex; gap:6px; }
-  .small-icon-btn { background:#ffe2ea; border:none; height:34px; padding:0 10px; border-radius:17px; font-size:12px; color:#b35f7b; cursor:pointer; font-weight:500; }
-  .small-icon-btn:hover { background:#ffd0dc; }
-
-  .quick-role-bar { display:flex; gap:6px; padding:8px 14px; background:#fff9fb; border-bottom:1px solid #ffe2ec; overflow-x:auto; flex-shrink:0; scrollbar-width:none; }
-  .quick-role-bar::-webkit-scrollbar { display:none; }
-  .quick-role-chip { display:flex; align-items:center; gap:5px; padding:5px 12px 5px 6px; border-radius:20px; background:#ffeef3; border:2px solid transparent; cursor:pointer; white-space:nowrap; font-size:13px; font-weight:500; color:#6b3e4c; flex-shrink:0; }
-  .quick-role-chip.active { border-color:#b35f7b; background:#ffe3ec; }
-  .chip-dot { width:18px; height:18px; border-radius:50%; border:2px solid white; flex-shrink:0; }
-  .chip-main-tag { font-size:9px; background:#ff8fab; color:white; padding:1px 5px; border-radius:6px; font-weight:600; }
-
-  .messages-container { flex:1; overflow-y:auto; padding:14px 12px 8px; display:flex; flex-direction:column; gap:10px; background:#fff9fb; }
-  .message { display:flex; flex-direction:column; max-width:82%; }
-  .message.right { align-self:flex-end; align-items:flex-end; }
-  .message.left { align-self:flex-start; align-items:flex-start; }
-  .message-sender { display:flex; align-items:center; gap:5px; font-size:11px; font-weight:600; margin-bottom:2px; color:#8b5c6d; }
-  .sender-dot { width:8px; height:8px; border-radius:50%; border:1.5px solid white; }
-  .message-bubble { padding:10px 14px; border-radius:18px; font-size:15px; line-height:1.45; word-break:break-word; color:#2a1a20; border:1px solid rgba(0,0,0,.04); box-shadow:0 3px 8px rgba(0,0,0,.08); cursor:pointer; }
-  .message.right .message-bubble { border-bottom-right-radius:5px; }
-  .message.left .message-bubble { border-bottom-left-radius:5px; }
-  .message-time { font-size:10px; color:#c4a0ae; margin-top:3px; padding:0 4px; }
-
-  .input-area { display:flex; align-items:center; gap:8px; padding:8px 10px 12px; background:#fff1f5; border-top:1px solid #ffd9e2; }
-  .message-input { flex:1; border:none; background:white; border-radius:40px; padding:12px 15px; font-size:15px; outline:none; color:#3e2a31; border:1px solid #ffe2ea; min-width:0; }
-  .message-input::placeholder { color:#dbb1c0; }
-  .send-btn { background:#ffb8cb; border:none; padding:0 18px; height:44px; border-radius:30px; font-size:15px; font-weight:600; color:white; cursor:pointer; flex-shrink:0; }
-  .send-btn:hover { background:#ffa5be; }
-
-  /* ========== 动态页 ========== */
-  .dynamic-compose {
-    background:#fff4f7; border:1px solid #ffe2ec; border-radius:22px; padding:14px 16px; margin-bottom:14px;
-  }
-  .dynamic-compose textarea {
-    width:100%; border:none; background:white; border-radius:16px; padding:12px 14px;
-    font-size:15px; outline:none; color:#3e2a31; resize:none; min-height:70px;
-    font-family:inherit; border:1px solid #ffe2ea;
-  }
-  .dynamic-compose textarea::placeholder { color:#dbb1c0; }
-  .compose-footer { display:flex; justify-content:space-between; align-items:center; margin-top:10px; gap:10px; }
-  .role-selector { display:flex; align-items:center; gap:6px; }
-  .role-selector-label { font-size:12px; color:#b98a99; }
-  .role-select-btn {
-    display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:18px;
-    background:white; border:1px solid #ffd0dc; cursor:pointer; font-size:13px; color:#6b3e4c;
-    font-weight:500;
-  }
-  .role-select-btn:hover { border-color:#ffa5be; }
-  .role-select-dot { width:14px; height:14px; border-radius:50%; border:1.5px solid white; box-shadow:0 1px 3px rgba(0,0,0,.15); }
-  .publish-btn { background:#ffb8cb; border:none; padding:8px 20px; border-radius:20px; font-size:14px; font-weight:600; color:white; cursor:pointer; }
-  .publish-btn:hover { background:#ffa5be; }
-
-  .dynamic-list { display:flex; flex-direction:column; gap:12px; }
-  .dynamic-item {
-    background:#fff4f7; border:1px solid #ffe2ec; border-radius:22px; padding:14px 16px;
-    position:relative;
-  }
-  .dynamic-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
-  .dynamic-avatar { width:34px; height:34px; border-radius:50%; border:2px solid white; box-shadow:0 2px 6px rgba(0,0,0,.1); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:600; color:white; flex-shrink:0; }
-  .dynamic-meta { flex:1; }
-  .dynamic-name { font-size:14px; font-weight:600; color:#5a3342; }
-  .dynamic-time { font-size:11px; color:#c4a0ae; margin-top:1px; }
-  .dynamic-content { font-size:15px; line-height:1.5; color:#3e2a31; word-break:break-word; white-space:pre-wrap; }
-  .dynamic-actions { display:flex; gap:16px; margin-top:10px; align-items:center; }
-  .dynamic-action { background:none; border:none; font-size:12px; color:#b98a99; cursor:pointer; display:flex; align-items:center; gap:4px; padding:4px 8px; border-radius:12px; }
-  .dynamic-action:hover { background:#ffe2ea; color:#b35f7b; }
-  .dynamic-action.liked { color:#e63946; font-weight:600; }
-  .dynamic-action.danger:hover { background:#ffe2e8; color:#c43a5a; }
-
-  /* ========== 日记页 ========== */
-  .calendar-card {
-    background:#fff4f7; border:1px solid #ffe2ec; border-radius:24px; padding:16px;
-    margin-bottom:14px;
-  }
-  .calendar-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
-  .calendar-title { font-size:17px; font-weight:600; color:#6b3e4c; }
-  .calendar-nav { display:flex; gap:6px; }
-  .cal-nav-btn { background:#ffe2ea; border:none; width:32px; height:32px; border-radius:50%; font-size:16px; color:#b35f7b; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-  .cal-nav-btn:hover { background:#ffd0dc; }
-  .calendar-weekdays { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:6px; }
-  .weekday { text-align:center; font-size:11px; color:#b98a99; font-weight:500; padding:4px 0; }
-  .calendar-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
-  .cal-day {
-    aspect-ratio:1; border-radius:12px; display:flex; flex-direction:column;
-    align-items:center; justify-content:center; cursor:pointer; position:relative;
-    font-size:13px; color:#6b3e4c; transition:.15s; border:1.5px solid transparent;
-  }
-  .cal-day:hover { background:#ffeef3; }
-  .cal-day.other-month { color:#e6c8d2; cursor:default; }
-  .cal-day.other-month:hover { background:transparent; }
-  .cal-day.today { border-color:#b35f7b; }
-  .cal-day .mood-dot { width:8px; height:8px; border-radius:50%; position:absolute; bottom:4px; }
-  .cal-day.has-diary { background:#fff0f5; }
-
-  .diary-legend { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; padding:8px 0 4px; }
-  .legend-item { display:flex; align-items:center; gap:5px; font-size:11px; color:#8b5c6d; }
-  .legend-dot { width:10px; height:10px; border-radius:50%; }
-
-  .diary-list { display:flex; flex-direction:column; gap:10px; }
-  .diary-card {
-    background:#fff4f7; border:1px solid #ffe2ec; border-radius:20px; padding:14px 16px;
-    cursor:pointer; transition:.15s;
-  }
-  .diary-card:hover { background:#ffeef3; }
-  .diary-card-header { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
-  .diary-date { font-size:14px; font-weight:600; color:#5a3342; }
-  .diary-mood-tag { font-size:11px; padding:2px 10px; border-radius:10px; color:white; font-weight:500; }
-  .diary-preview { font-size:14px; color:#8b5c6d; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-
-  /* ========== 底部操作弹层 ========== */
-  .action-sheet { position:fixed; inset:0; background:rgba(80,40,55,.35); backdrop-filter:blur(2px); display:none; justify-content:center; align-items:flex-end; z-index:2000; }
-  .action-sheet.show { display:flex; }
-  .action-sheet-inner { background:#fff9fb; width:100%; max-width:420px; border-radius:24px 24px 0 0; padding:20px 18px 26px; border-top:1px solid #ffd9e2; animation:slideUp .2s ease; max-height:80vh; overflow-y:auto; }
-  @keyframes slideUp { from{transform:translateY(100%);} to{transform:translateY(0);} }
-  .action-sheet-title { font-size:14px; color:#b98a99; text-align:center; margin-bottom:14px; }
-  .action-btn { width:100%; padding:14px; border-radius:18px; border:none; background:#ffeef3; font-size:16px; color:#5a3342; font-weight:500; cursor:pointer; margin-bottom:8px; transition:.15s; }
-  .action-btn:hover { background:#ffe3ec; }
-  .action-btn.danger { color:#c43a5a; background:#ffe2e8; }
-  .action-btn.cancel { background:#ffe2ea; color:#8b5c6d; margin-top:4px; }
-
-  /* ========== 通用模态框 ========== */
-  .modal-overlay { position:fixed; inset:0; background:rgba(180,120,140,.25); backdrop-filter:blur(3px); display:none; justify-content:center; align-items:center; z-index:1000; padding:16px; }
-  .modal-overlay.show { display:flex; }
-  .modal-content { background:#fff9fb; width:100%; max-width:390px; border-radius:32px; padding:22px 20px 20px; box-shadow:0 20px 40px rgba(190,120,140,.3); border:1px solid #ffd9e2; max-height:88vh; overflow-y:auto; }
-  .modal-title { font-size:19px; font-weight:600; color:#b35f7b; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; }
-  .modal-close { background:none; border:none; font-size:24px; color:#c28b9b; cursor:pointer; }
-  .modal-hint { font-size:12px; color:#b98a99; margin-bottom:16px; line-height:1.4; }
-
-  .role-card { background:#fff4f7; border:1px solid #ffe2ec; border-radius:20px; padding:12px 14px; margin-bottom:12px; }
-  .role-card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-  .role-card-title { font-size:13px; font-weight:600; color:#8b5c6d; }
-  .main-badge { font-size:10px; color:#fff; background:#ff8fab; padding:2px 8px; border-radius:10px; font-weight:600; }
-  .role-remove { background:none; border:none; color:#d17a92; font-size:18px; cursor:pointer; padding:0 4px; }
-  .role-remove:disabled { color:#e6c8d2; cursor:not-allowed; }
-  .role-input { width:100%; padding:10px 14px; border-radius:20px; border:1px solid #ffd0dc; background:white; font-size:14px; outline:none; color:#3e2a31; margin-bottom:10px; }
-  .role-input:focus { border-color:#ffa5be; }
-  .color-grid { display:flex; flex-wrap:wrap; gap:8px; }
-  .color-option { width:32px; height:32px; border-radius:50%; border:3px solid transparent; cursor:pointer; }
-  .color-option.selected { border-color:#5a3342; transform:scale(1.1); }
-  .color-option.used { opacity:.3; cursor:not-allowed; }
-  .main-role-toggle { display:flex; align-items:center; gap:6px; font-size:12px; color:#8b5c6d; margin-top:10px; cursor:pointer; }
-  .main-role-toggle input { accent-color:#ff8fab; width:16px; height:16px; }
-  .add-role-btn { width:100%; padding:12px; border-radius:22px; border:1px dashed #ffb8cb; background:transparent; color:#b35f7b; font-size:14px; font-weight:600; cursor:pointer; margin-bottom:6px; }
-  .add-role-btn:hover { background:#fff4f7; }
-  .modal-actions { display:flex; gap:12px; margin-top:18px; justify-content:flex-end; }
-  .btn { padding:11px 22px; border-radius:40px; border:none; font-size:15px; font-weight:500; cursor:pointer; }
-  .btn-primary { background:#ffb8cb; color:white; }
-  .btn-primary:hover { background:#ffa5be; }
-  .btn-primary:disabled { background:#ffd9e2; cursor:not-allowed; }
-  .btn-secondary { background:#ffe2ea; color:#8b5c6d; }
-  .btn-danger { background:#ffd0da; color:#c43a5a; }
-
-  .input-simple { width:100%; padding:14px 16px; border-radius:24px; border:1px solid #ffd0dc; background:white; font-size:16px; outline:none; color:#3e2a31; }
-  .input-simple:focus { border-color:#ffa5be; }
-
-  .mood-picker { display:flex; gap:10px; justify-content:center; margin:12px 0; flex-wrap:wrap; }
-  .mood-item { display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; padding:8px 12px; border-radius:16px; border:2px solid transparent; transition:.15s; }
-  .mood-item:hover { background:#ffeef3; }
-  .mood-item.selected { border-color:#b35f7b; background:#ffe3ec; }
-  .mood-color-circle { width:28px; height:28px; border-radius:50%; border:2px solid white; box-shadow:0 2px 6px rgba(0,0,0,.1); }
-  .mood-label { font-size:11px; color:#6b3e4c; }
-
-  .toast { position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:rgba(90,51,66,.92); color:white; padding:10px 22px; border-radius:24px; font-size:14px; z-index:3000; opacity:0; transition:opacity .25s; pointer-events:none; white-space:nowrap; }
-  .toast.show { opacity:1; }
-
-  ::-webkit-scrollbar { width:4px; }
-  ::-webkit-scrollbar-track { background:#ffeef3; }
-  ::-webkit-scrollbar-thumb { background:#ffc1d2; border-radius:10px; }
-</style>
+<title>Room</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="app" id="app">
@@ -242,10 +12,14 @@
   <!-- ============ 页面1：对话 ============ -->
   <div class="page active" id="pageChat">
     <div class="header">
-      <h1>对话</h1>
+      <h1>对话 <span id="currentTime" style="font-size:12px;color:var(--text-sub);margin-left:8px;font-weight:normal;"></span></h1>
       <div class="header-actions">
-        <button class="icon-btn" id="importBtn">导入</button>
-        <button class="icon-btn" id="addListBtn">+</button>
+        <button class="icon-btn gear-btn" id="themeToggleBtn" title="切换主题">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </button>
+        <button class="icon-btn gear-btn" id="chatSettingsBtn" title="设置">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
       </div>
     </div>
     <div class="page-body" id="chatListContainer">
@@ -259,13 +33,13 @@
         <div class="chat-title" id="chatTitle">聊天</div>
         <div class="chat-header-actions">
           <button class="small-icon-btn" id="manageRolesBtn">角色</button>
-          <button class="small-icon-btn" id="exportListBtn">导出</button>
+          <button class="small-icon-btn" id="chatMoreBtn">更多</button>
         </div>
       </div>
       <div class="quick-role-bar" id="quickRoleBar"></div>
       <div class="messages-container" id="messagesContainer"></div>
-      <div class="input-area">
-        <input type="text" class="message-input" id="messageInput" placeholder="输入消息...">
+      <div class="input-area" id="chatInputArea">
+        <textarea class="message-input" id="messageInput" placeholder="输入消息..." rows="1"></textarea>
         <button class="send-btn" id="sendBtn">发送</button>
       </div>
     </div>
@@ -273,9 +47,7 @@
 
   <!-- ============ 页面2：动态 ============ -->
   <div class="page" id="pageDynamic">
-    <div class="header">
-      <h1>动态</h1>
-    </div>
+    <div class="header"><h1>动态</h1></div>
     <div class="page-body">
       <div class="dynamic-compose">
         <textarea id="dynamicInput" placeholder="分享点什么..."></textarea>
@@ -296,9 +68,7 @@
 
   <!-- ============ 页面3：日记 ============ -->
   <div class="page" id="pageDiary">
-    <div class="header">
-      <h1>心情日记</h1>
-    </div>
+    <div class="header"><h1>心情日记</h1></div>
     <div class="page-body">
       <div class="calendar-card">
         <div class="calendar-header">
@@ -320,30 +90,73 @@
     </div>
   </div>
 
+  <!-- ============ 页面4：创作 ============ -->
+  <div class="page" id="pageCreative">
+    <div class="header">
+      <h1>创作</h1>
+      <div class="header-actions">
+        <button class="icon-btn" id="newCreativeBtn">新建书籍</button>
+      </div>
+    </div>
+    <div class="page-body">
+      <div class="creative-list" id="creativeList"></div>
+    </div>
+  </div>
+
   <!-- ============ 底部导航 ============ -->
   <div class="bottom-nav">
     <div class="nav-item active" data-tab="chat">
-      <div class="nav-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      </div>
+      <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
       <div class="nav-label">对话</div>
     </div>
     <div class="nav-item" data-tab="dynamic">
-      <div class="nav-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-      </div>
+      <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
       <div class="nav-label">动态</div>
     </div>
     <div class="nav-item" data-tab="diary">
-      <div class="nav-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      </div>
+      <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
       <div class="nav-label">日记</div>
+    </div>
+    <div class="nav-item" data-tab="creative">
+      <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+      <div class="nav-label">创作</div>
     </div>
   </div>
 </div>
 
-<!-- ============ 各模态框 ============ -->
+<!-- ============ 弹层与模态框 ============ -->
+
+<!-- 主页设置菜单 -->
+<div class="action-sheet" id="homeSettingsSheet">
+  <div class="action-sheet-inner">
+    <div class="action-sheet-title">对话设置</div>
+    <button class="action-btn" id="menuNewChatBtn">新建对话</button>
+    <button class="action-btn" id="menuImportBtn">导入对话</button>
+    <button class="action-btn" id="menuBackupBtn">备份所有数据</button>
+    <button class="action-btn cancel" id="homeMenuCancelBtn">取消</button>
+  </div>
+</div>
+
+<!-- 聊天详情更多菜单 -->
+<div class="action-sheet" id="chatMoreSheet">
+  <div class="action-sheet-inner">
+    <div class="action-sheet-title">更多操作</div>
+    <button class="action-btn" id="menuRenameChatBtn">重命名本对话</button>
+    <button class="action-btn" id="menuExportChatBtn">导出本对话</button>
+    <button class="action-btn" id="menuExportChatImgBtn">导出聊天长图</button>
+    <button class="action-btn cancel" id="chatMoreCancelBtn">取消</button>
+  </div>
+</div>
+
+<!-- 消息气泡操作菜单 -->
+<div class="action-sheet" id="msgActionSheet">
+  <div class="action-sheet-inner">
+    <div class="action-sheet-title">消息操作</div>
+    <button class="action-btn" id="msgEditBtn">编辑文字</button>
+    <button class="action-btn danger" id="msgDeleteBtn">删除这条消息</button>
+    <button class="action-btn cancel" id="msgCancelBtn">取消</button>
+  </div>
+</div>
 
 <!-- 新建/管理角色 -->
 <div class="modal-overlay" id="modalOverlay">
@@ -359,12 +172,12 @@
   </div>
 </div>
 
-<!-- 导出/导入通用：导入用 -->
+<!-- 导入 / 备份恢复 -->
 <div class="modal-overlay" id="importModal">
   <div class="modal-content">
-    <div class="modal-title">导入列表<button class="modal-close" id="importCloseBtn">×</button></div>
-    <div class="modal-hint">选择之前导出的 JSON 文件，或粘贴内容。</div>
-    <input type="file" id="importFileInput" accept=".json,application/json" style="margin-bottom:12px;font-size:13px;color:#8b5c6d;">
+    <div class="modal-title">导入 / 恢复数据<button class="modal-close" id="importCloseBtn">×</button></div>
+    <div class="modal-hint">选择之前导出的 JSON 备份文件，或粘贴内容。</div>
+    <input type="file" id="importFileInput" accept=".json,application/json" style="margin-bottom:12px;font-size:13px;color:var(--text-sub);">
     <textarea id="importTextarea" class="input-simple" rows="5" placeholder="粘贴 JSON..." style="resize:none;font-family:monospace;font-size:12px;"></textarea>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="importCancelBtn">取消</button>
@@ -373,18 +186,89 @@
   </div>
 </div>
 
-<!-- 日记编辑 -->
-<div class="modal-overlay" id="diaryModal">
+<!-- 重命名对话 -->
+<div class="modal-overlay" id="renameModal">
   <div class="modal-content">
-    <div class="modal-title"><span id="diaryModalTitle">写日记</span><button class="modal-close" id="diaryCloseBtn">×</button></div>
-    <div class="modal-hint" id="diaryDateLabel"></div>
-    <div class="mood-picker" id="moodPicker"></div>
-    <textarea id="diaryInput" class="input-simple" rows="6" placeholder="今天发生了什么..." style="resize:none;font-family:inherit;line-height:1.5;"></textarea>
+    <div class="modal-title">重命名对话<button class="modal-close" id="renameCloseBtn">×</button></div>
+    <input type="text" id="renameInput" class="input-simple" placeholder="输入新标题" maxlength="30" style="margin-bottom:16px;">
     <div class="modal-actions">
-      <button class="btn btn-danger" id="diaryDeleteBtn" style="margin-right:auto;display:none;">删除</button>
-      <button class="btn btn-secondary" id="diaryCancelBtn">取消</button>
-      <button class="btn btn-primary" id="diarySaveBtn">保存</button>
+      <button class="btn btn-secondary" id="renameCancelBtn">取消</button>
+      <button class="btn btn-primary" id="renameConfirmBtn">保存</button>
     </div>
+  </div>
+</div>
+
+<!-- 编辑消息 -->
+<div class="modal-overlay" id="editMsgModal">
+  <div class="modal-content">
+    <div class="modal-title">编辑消息<button class="modal-close" id="editMsgCloseBtn">×</button></div>
+    <textarea id="editMsgInput" class="input-simple" rows="4" style="resize:none;font-family:inherit;margin-bottom:16px;"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="editMsgCancelBtn">取消</button>
+      <button class="btn btn-primary" id="editMsgConfirmBtn">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 日记全屏编辑/阅读页 -->
+<div class="diary-editor-page" id="diaryEditorPage">
+  <div class="diary-editor-header">
+    <button class="back-btn" id="diaryEditorBackBtn">←</button>
+    <div class="diary-editor-date" id="diaryEditorDate"></div>
+    <button class="small-icon-btn" id="diarySaveBtn">保存</button>
+  </div>
+  <div class="diary-editor-body">
+    <div class="mood-picker" id="moodPicker"></div>
+    <textarea id="diaryInput" class="diary-textarea" placeholder="今天发生了什么..."></textarea>
+  </div>
+</div>
+
+<!-- 创作：书籍/卷/章节 列表页 -->
+<div class="creative-manager" id="creativeManager">
+  <div class="chat-header">
+    <button class="back-btn" id="creativeManagerBackBtn">←</button>
+    <div class="chat-title" id="creativeManagerTitle">书籍</div>
+    <button class="small-icon-btn" id="creativeAddBtn">添加</button>
+  </div>
+  <div class="page-body">
+    <div id="creativeManagerList" class="creative-list"></div>
+  </div>
+</div>
+
+<!-- 创作：全屏富文本编辑器 -->
+<div class="creative-editor" id="creativeEditor">
+  <div class="creative-editor-header">
+    <button class="back-btn" id="creativeEditorBackBtn">←</button>
+    <input type="text" class="creative-title-input" id="creativeTitleInput" placeholder="章节名">
+    <button class="small-icon-btn" id="creativeEditorSaveBtn">保存</button>
+  </div>
+  <div class="creative-toolbar" id="creativeToolbar">
+    <div class="toolbar-row">
+      <button class="tool-btn" id="toolBold"><b>B</b></button>
+      <button class="tool-btn" id="toolItalic"><i>I</i></button>
+      <button class="tool-btn" id="toolUnderline"><u>U</u></button>
+      <button class="tool-btn" id="toolClear">清除</button>
+      <button class="tool-btn" id="toolExportImg" style="margin-left:auto; background:#ffe2ea;">存图</button>
+    </div>
+    <div class="toolbar-row">
+      <span class="tool-label">字体</span>
+      <select class="tool-select" id="toolFontSelect">
+        <option value="system">默认</option>
+        <option value="kai">楷体</option>
+        <option value="song">宋体</option>
+      </select>
+      <span class="tool-label">字色</span>
+      <div class="tool-colors" id="toolColors"></div>
+      <span class="tool-label">背景</span>
+      <div class="tool-bgs" id="toolBgs"></div>
+    </div>
+  </div>
+  <div class="creative-editor-body" id="creativeEditorBody">
+    <div id="creativeBodyInput" class="creative-body-input" contenteditable="true" spellcheck="false" data-placeholder="开始写吧..."></div>
+  </div>
+  <div class="creative-editor-footer">
+    <span id="creativeWordCount">0 字</span>
+    <span id="creativeSaveStatus"></span>
   </div>
 </div>
 
@@ -407,740 +291,8 @@
 </div>
 
 <div class="toast" id="toast"></div>
+<canvas id="exportCanvas" style="display:none;"></canvas>
 
-<script>
-(function(){
-  // ============================================================
-  // 常量与工具
-  // ============================================================
-  const PRESET_COLORS = [
-    '#E63946','#F4A261','#E9C46A','#2A9D8F','#457B9D','#9B5DE5',
-    '#F15BB5','#00BBF9','#00F5D4','#FFBE0B','#FB5607','#8338EC',
-    '#3A86FF','#FF006E','#06D6A0','#118AB2','#EF476F','#073B4C'
-  ];
-  const MOODS = [
-    { key:'happy',   label:'开心', color:'#FFB6C1' },
-    { key:'calm',    label:'平静', color:'#B0E0E6' },
-    { key:'sad',     label:'难过', color:'#C7CEEA' },
-    { key:'angry',   label:'生气', color:'#FF9AA2' },
-    { key:'tired',   label:'疲惫', color:'#D8BFD8' }
-  ];
-
-  function genId(){ return 'id_' + Date.now() + '_' + Math.random().toString(36).slice(2,8); }
-  function escapeHtml(t){ const d=document.createElement('div'); d.textContent=t==null?'':t; return d.innerHTML; }
-  function nowTime(){
-    const d=new Date(), pad=n=>String(n).padStart(2,'0');
-    return `${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  }
-  function todayKey(){
-    const d=new Date(), pad=n=>String(n).padStart(2,'0');
-    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-  }
-  function showToast(msg){
-    const el=document.getElementById('toast');
-    el.textContent=msg; el.classList.add('show');
-    clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),1800);
-  }
-  function formatRelativeTime(iso){
-    const now=Date.now(), t=new Date(iso).getTime();
-    const diff=Math.floor((now-t)/1000);
-    if(diff<60) return '刚刚';
-    if(diff<3600) return Math.floor(diff/60)+'分钟前';
-    if(diff<86400) return Math.floor(diff/3600)+'小时前';
-    const d=new Date(iso), pad=n=>String(n).padStart(2,'0');
-    return `${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-  }
-
-  // ============================================================
-  // 数据层
-  // ============================================================
-  let chatLists = [];
-  let dynamics = [];   // { id, roleId, roleName, roleColor, text, time, likes }
-  let diaries = {};    // { 'YYYY-MM-DD': { date, mood, text, time } }
-
-  function saveChats(){ try{ localStorage.setItem('pinkApp_chats', JSON.stringify(chatLists)); }catch(e){} }
-  function loadChats(){ try{ const r=localStorage.getItem('pinkApp_chats'); if(r) chatLists=JSON.parse(r); }catch(e){} }
-  function saveDynamics(){ try{ localStorage.setItem('pinkApp_dynamics', JSON.stringify(dynamics)); }catch(e){} }
-  function loadDynamics(){ try{ const r=localStorage.getItem('pinkApp_dynamics'); if(r) dynamics=JSON.parse(r); }catch(e){} }
-  function saveDiaries(){ try{ localStorage.setItem('pinkApp_diaries', JSON.stringify(diaries)); }catch(e){} }
-  function loadDiaries(){ try{ const r=localStorage.getItem('pinkApp_diaries'); if(r) diaries=JSON.parse(r); }catch(e){} }
-
-  // ============================================================
-  // 通用：确认弹层
-  // ============================================================
-  let confirmCallback = null;
-  const confirmSheet = document.getElementById('confirmSheet');
-  const confirmSheetTitle = document.getElementById('confirmSheetTitle');
-  function showConfirm(title, cb){
-    confirmSheetTitle.textContent = title;
-    confirmCallback = cb;
-    confirmSheet.classList.add('show');
-  }
-  document.getElementById('confirmSheetCancel').addEventListener('click', ()=>{
-    confirmSheet.classList.remove('show'); confirmCallback=null;
-  });
-  document.getElementById('confirmSheetOk').addEventListener('click', ()=>{
-    confirmSheet.classList.remove('show');
-    if(confirmCallback){ confirmCallback(); confirmCallback=null; }
-  });
-
-  // ============================================================
-  // 底部导航切换
-  // ============================================================
-  const pages = {
-    chat: document.getElementById('pageChat'),
-    dynamic: document.getElementById('pageDynamic'),
-    diary: document.getElementById('pageDiary')
-  };
-  document.querySelectorAll('.nav-item').forEach(item=>{
-    item.addEventListener('click', ()=>{
-      const tab = item.dataset.tab;
-      // 如果聊天详情打开着，切Tab前先退出详情
-      if(tab !== 'chat' && chatDetail.classList.contains('active')){
-        chatDetail.classList.remove('active');
-        document.getElementById('chatListContainer').style.display = '';
-      }
-      document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-      item.classList.add('active');
-      Object.keys(pages).forEach(k=>{
-        pages[k].classList.toggle('active', k===tab);
-      });
-      if(tab==='dynamic') renderDynamics();
-      if(tab==='diary') renderCalendar();
-    });
-  });
-
-  // ============================================================
-  // 模块一：对话（精简保留原有逻辑）
-  // ============================================================
-  const chatListContainer = document.getElementById('chatListContainer');
-  const listContainer = document.getElementById('listContainer');
-  const chatDetail = document.getElementById('chatDetail');
-  const chatTitle = document.getElementById('chatTitle');
-  const quickRoleBar = document.getElementById('quickRoleBar');
-  const messagesContainer = document.getElementById('messagesContainer');
-  const messageInput = document.getElementById('messageInput');
-  let currentListId = null;
-  let currentRoleId = null;
-
-  function renderChatList(){
-    if(chatLists.length===0){
-      listContainer.innerHTML = `<div class="empty-tip">还没有对话，点右上角 + 新建</div>`;
-      return;
-    }
-    let html='';
-    chatLists.forEach(list=>{
-      const dots = list.roles.slice(0,4).map(r=>`<div class="list-color-dot" style="background:${r.color};"></div>`).join('');
-      const main = list.roles.find(r=>r.isMain);
-      html += `<div class="chat-list-item" data-id="${list.id}">
-        <div class="list-colors">${dots}</div>
-        <div class="list-info">
-          <div class="list-title">${escapeHtml(list.title)}</div>
-          <div class="list-badge">${list.roles.length>=3?'群聊':'双人'} · 主要：${escapeHtml(main?main.name:'未设置')}</div>
-        </div>
-      </div>`;
-    });
-    listContainer.innerHTML = html;
-    listContainer.querySelectorAll('.chat-list-item').forEach(item=>{
-      item.addEventListener('click', ()=> enterChat(item.dataset.id));
-    });
-  }
-
-  function enterChat(listId){
-    const list = chatLists.find(l=>l.id===listId);
-    if(!list) return;
-    currentListId = listId;
-    chatTitle.textContent = list.title;
-    const main = list.roles.find(r=>r.isMain);
-    currentRoleId = main ? main.id : list.roles[0]?.id;
-    renderQuickRoleBar();
-    renderMessages();
-    document.getElementById('chatListContainer').style.display = 'none';
-    chatDetail.classList.add('active');
-  }
-
-  function exitChatDetail(){
-    chatDetail.classList.remove('active');
-    document.getElementById('chatListContainer').style.display = '';
-    renderChatList();
-  }
-
-  function renderQuickRoleBar(){
-    const list = chatLists.find(l=>l.id===currentListId);
-    if(!list){ quickRoleBar.innerHTML=''; return; }
-    let html='';
-    list.roles.forEach(role=>{
-      html += `<div class="quick-role-chip ${role.id===currentRoleId?'active':''}" data-role-id="${role.id}">
-        <span class="chip-dot" style="background:${role.color};"></span>
-        ${escapeHtml(role.name)}
-        ${role.isMain?'<span class="chip-main-tag">主</span>':''}
-      </div>`;
-    });
-    quickRoleBar.innerHTML = html;
-    quickRoleBar.querySelectorAll('.quick-role-chip').forEach(chip=>{
-      chip.addEventListener('click', ()=>{
-        currentRoleId = chip.dataset.roleId;
-        renderQuickRoleBar();
-      });
-    });
-  }
-
-  function renderMessages(){
-    const list = chatLists.find(l=>l.id===currentListId);
-    if(!list) return;
-    const msgs = list.messages || [];
-    if(msgs.length===0){
-      messagesContainer.innerHTML = `<div style="text-align:center;color:#dbb1c0;padding:40px 0;font-size:14px;">开始对话吧</div>`;
-      return;
-    }
-    const mainRole = list.roles.find(r=>r.isMain);
-    const mainId = mainRole ? mainRole.id : null;
-    let html='';
-    msgs.forEach(msg=>{
-      const isRight = msg.senderId===mainId;
-      const role = list.roles.find(r=>r.id===msg.senderId);
-      const color = role?role.color:'#ccc';
-      html += `<div class="message ${isRight?'right':'left'}">
-        <div class="message-sender"><span class="sender-dot" style="background:${color};"></span>${escapeHtml(msg.senderName)}</div>
-        <div class="message-bubble" style="background:${color};" data-msg-id="${msg.id}">${escapeHtml(msg.text)}</div>
-        <div class="message-time">${escapeHtml(msg.time||'')}</div>
-      </div>`;
-    });
-    messagesContainer.innerHTML = html;
-    // 长按删除消息（简化版：点击气泡弹确认删除，实际用长按更复杂，这里用点击确认）
-    messagesContainer.querySelectorAll('.message-bubble').forEach(b=>{
-      b.addEventListener('click', ()=>{
-        const msgId = b.dataset.msgId;
-        showConfirm('删除这条消息？', ()=>{
-          list.messages = list.messages.filter(m=>m.id!==msgId);
-          saveChats(); renderMessages();
-        });
-      });
-    });
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-  }
-
-  function sendMessage(){
-    const text = messageInput.value.trim();
-    if(!text || !currentListId || !currentRoleId) return;
-    const list = chatLists.find(l=>l.id===currentListId);
-    const role = list.roles.find(r=>r.id===currentRoleId);
-    if(!role) return;
-    if(!list.messages) list.messages=[];
-    list.messages.push({ id:genId(), senderId:role.id, senderName:role.name, text, time:nowTime() });
-    messageInput.value='';
-    saveChats(); renderMessages();
-  }
-
-  document.getElementById('backBtn').addEventListener('click', exitChatDetail);
-  document.getElementById('sendBtn').addEventListener('click', sendMessage);
-  messageInput.addEventListener('keypress', e=>{ if(e.key==='Enter'){ e.preventDefault(); sendMessage(); } });
-
-  // --- 导出列表 ---
-  document.getElementById('exportListBtn').addEventListener('click', ()=>{
-    const list = chatLists.find(l=>l.id===currentListId);
-    if(!list) return;
-    const data = JSON.stringify(list, null, 2);
-    const blob = new Blob([data], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href=url; a.download=`${(list.title||'chat').replace(/[\\/:*?"<>|]/g,'_')}.json`;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    showToast('已导出');
-  });
-
-  // --- 角色管理/新建（复用之前的角色编辑模态框逻辑） ---
-  let editingMode='create', editingRoles=[], tempRoleCounter=0, manageListId=null;
-  const modalOverlay = document.getElementById('modalOverlay');
-  const modalTitleText = document.getElementById('modalTitleText');
-  const modalHint = document.getElementById('modalHint');
-  const roleCardsContainer = document.getElementById('roleCardsContainer');
-  const confirmAddBtn = document.getElementById('confirmAddBtn');
-
-  function openCreateModal(){
-    editingMode='create'; manageListId=null;
-    modalTitleText.textContent='新建聊天';
-    modalHint.textContent='至少两个角色，指定一个主要角色（消息在右侧）。每个颜色不可重复。';
-    confirmAddBtn.textContent='创建';
-    editingRoles = [
-      { tempId:'tmp_'+(++tempRoleCounter), name:'', color:PRESET_COLORS[0], isMain:true },
-      { tempId:'tmp_'+(++tempRoleCounter), name:'', color:PRESET_COLORS[1], isMain:false }
-    ];
-    renderRoleCards();
-    modalOverlay.classList.add('show');
-  }
-
-  function openManageRolesModal(){
-    const list = chatLists.find(l=>l.id===currentListId);
-    if(!list) return;
-    editingMode='manage'; manageListId=list.id;
-    modalTitleText.textContent='管理角色';
-    modalHint.textContent='修改后点击保存。';
-    confirmAddBtn.textContent='保存';
-    editingRoles = list.roles.map(r=>({
-      tempId:'tmp_'+(++tempRoleCounter), originalId:r.id, name:r.name, color:r.color, isMain:r.isMain
-    }));
-    renderRoleCards();
-    modalOverlay.classList.add('show');
-  }
-
-  function getUsedColors(excludeTempId){
-    return editingRoles.filter(r=>r.tempId!==excludeTempId).map(r=>r.color);
-  }
-
-  function renderRoleCards(){
-    let html='';
-    editingRoles.forEach((role,index)=>{
-      const usedColors = getUsedColors(role.tempId);
-      let colorHtml='';
-      PRESET_COLORS.forEach(c=>{
-        const isUsed = usedColors.includes(c);
-        colorHtml += `<div class="color-option ${role.color===c?'selected':''} ${isUsed?'used':''}" style="background:${c};" data-color="${c}" data-tempid="${role.tempId}"></div>`;
-      });
-      const canRemove = editingRoles.length>2;
-      html += `<div class="role-card" data-tempid="${role.tempId}">
-        <div class="role-card-header">
-          <div class="role-card-title">角色 ${index+1} ${role.isMain?'<span class="main-badge">主要</span>':''}</div>
-          ${canRemove?`<button class="role-remove" data-tempid="${role.tempId}">×</button>`:'<button class="role-remove" disabled>×</button>'}
-        </div>
-        <input type="text" class="role-input" placeholder="角色名字" maxlength="16" value="${escapeHtml(role.name)}" data-tempid="${role.tempId}">
-        <div class="color-grid">${colorHtml}</div>
-        <label class="main-role-toggle">
-          <input type="radio" name="mainRoleRadio" value="${role.tempId}" ${role.isMain?'checked':''}>
-          设为主要角色（消息显示在右侧）
-        </label>
-      </div>`;
-    });
-    roleCardsContainer.innerHTML = html;
-
-    roleCardsContainer.querySelectorAll('.role-input').forEach(input=>{
-      input.addEventListener('input', e=>{
-        const r = editingRoles.find(r=>r.tempId===e.target.dataset.tempid);
-        if(r) r.name = e.target.value;
-        updateConfirmState();
-      });
-    });
-    roleCardsContainer.querySelectorAll('.color-option').forEach(el=>{
-      el.addEventListener('click', ()=>{
-        const tempId = el.dataset.tempid, color = el.dataset.color;
-        if(getUsedColors(tempId).includes(color)){ showToast('颜色已被使用'); return; }
-        const r = editingRoles.find(r=>r.tempId===tempId);
-        if(r){ r.color=color; renderRoleCards(); }
-      });
-    });
-    roleCardsContainer.querySelectorAll('input[name="mainRoleRadio"]').forEach(radio=>{
-      radio.addEventListener('change', e=>{
-        const sel = e.target.value;
-        editingRoles.forEach(r=>{ r.isMain = r.tempId===sel; });
-        renderRoleCards();
-      });
-    });
-    roleCardsContainer.querySelectorAll('.role-remove[data-tempid]').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        if(editingRoles.length<=2) return;
-        const tempId = btn.dataset.tempid;
-        const wasMain = editingRoles.find(r=>r.tempId===tempId)?.isMain;
-        editingRoles = editingRoles.filter(r=>r.tempId!==tempId);
-        if(wasMain && editingRoles.length>0) editingRoles[0].isMain = true;
-        renderRoleCards();
-      });
-    });
-    updateConfirmState();
-  }
-
-  function updateConfirmState(){
-    const ok = editingRoles.every(r=>r.name.trim()) &&
-               editingRoles.some(r=>r.isMain) &&
-               new Set(editingRoles.map(r=>r.color)).size===editingRoles.length &&
-               editingRoles.length>=2;
-    confirmAddBtn.disabled = !ok;
-  }
-
-  confirmAddBtn.addEventListener('click', ()=>{
-    if(confirmAddBtn.disabled) return;
-    if(editingMode==='create'){
-      const roles = editingRoles.map(r=>({ id:genId(), name:r.name.trim(), color:r.color, isMain:r.isMain }));
-      let title = roles.map(r=>r.name).join('、');
-      if(title.length>18) title = title.slice(0,18)+'...';
-      const newList = { id:genId(), title, roles, messages:[] };
-      chatLists.push(newList);
-      saveChats(); renderChatList();
-      modalOverlay.classList.remove('show');
-      enterChat(newList.id);
-    } else {
-      const list = chatLists.find(l=>l.id===manageListId);
-      if(!list) return;
-      const newRoles = editingRoles.map(r=>{
-        const ex = r.originalId ? list.roles.find(x=>x.id===r.originalId) : null;
-        return { id: ex?ex.id:genId(), name:r.name.trim(), color:r.color, isMain:r.isMain };
-      });
-      const nameMap = {};
-      list.roles.forEach(o=>{
-        const nr = editingRoles.find(er=>er.originalId===o.id);
-        if(nr) nameMap[o.id]=nr.name.trim();
-      });
-      (list.messages||[]).forEach(m=>{ if(nameMap[m.senderId]) m.senderName=nameMap[m.senderId]; });
-      list.roles = newRoles;
-      if(!newRoles.find(r=>r.id===currentRoleId)){
-        const main = newRoles.find(r=>r.isMain);
-        currentRoleId = main?main.id:newRoles[0]?.id;
-      }
-      saveChats(); renderQuickRoleBar(); renderMessages(); renderChatList();
-      modalOverlay.classList.remove('show');
-      showToast('角色已更新');
-    }
-  });
-
-  document.getElementById('addListBtn').addEventListener('click', openCreateModal);
-  document.getElementById('manageRolesBtn').addEventListener('click', openManageRolesModal);
-  document.getElementById('modalCloseBtn').addEventListener('click', ()=>modalOverlay.classList.remove('show'));
-  document.getElementById('cancelAddBtn').addEventListener('click', ()=>modalOverlay.classList.remove('show'));
-  document.getElementById('addRoleBtn').addEventListener('click', ()=>{
-    const used = editingRoles.map(r=>r.color);
-    const avail = PRESET_COLORS.find(c=>!used.includes(c));
-    if(!avail){ showToast('没有更多颜色'); return; }
-    editingRoles.push({ tempId:'tmp_'+(++tempRoleCounter), name:'', color:avail, isMain:false });
-    renderRoleCards();
-  });
-
-  // --- 导入 ---
-  const importModal = document.getElementById('importModal');
-  document.getElementById('importBtn').addEventListener('click', ()=>{
-    document.getElementById('importTextarea').value='';
-    document.getElementById('importFileInput').value='';
-    importModal.classList.add('show');
-  });
-  document.getElementById('importCloseBtn').addEventListener('click', ()=>importModal.classList.remove('show'));
-  document.getElementById('importCancelBtn').addEventListener('click', ()=>importModal.classList.remove('show'));
-  document.getElementById('importFileInput').addEventListener('change', e=>{
-    const f=e.target.files[0]; if(!f) return;
-    const r=new FileReader();
-    r.onload=ev=>{ document.getElementById('importTextarea').value = ev.target.result; };
-    r.readAsText(f);
-  });
-  document.getElementById('importConfirmBtn').addEventListener('click', ()=>{
-    const text = document.getElementById('importTextarea').value.trim();
-    if(!text){ showToast('请输入内容'); return; }
-    try {
-      const data = JSON.parse(text);
-      const arr = Array.isArray(data)?data:[data];
-      const valid = [];
-      for(const l of arr){
-        if(!l.roles || !Array.isArray(l.roles) || l.roles.length<2){ showToast('角色数据无效'); return; }
-        if(!l.roles.some(r=>r.isMain)){ showToast('缺少主要角色'); return; }
-        const idMap = {};
-        const roles = l.roles.map(r=>{ const nid=genId(); idMap[r.id]=nid; return {id:nid, name:r.name, color:r.color, isMain:r.isMain}; });
-        const msgs = (l.messages||[]).map(m=>({
-          id:genId(), senderId:idMap[m.senderId]||roles[0].id, senderName:m.senderName, text:m.text, time:m.time||nowTime()
-        }));
-        valid.push({ id:genId(), title:l.title||'导入的对话', roles, messages:msgs });
-      }
-      chatLists = chatLists.concat(valid);
-      saveChats(); renderChatList();
-      importModal.classList.remove('show');
-      showToast(`导入 ${valid.length} 个列表`);
-    } catch(e){ showToast('JSON 格式错误'); }
-  });
-
-  // ============================================================
-  // 模块二：动态
-  // ============================================================
-  let dynamicRoleId = null;
-  const dynamicInput = document.getElementById('dynamicInput');
-  const dynamicRoleBtn = document.getElementById('dynamicRoleBtn');
-  const dynamicRoleDot = document.getElementById('dynamicRoleDot');
-  const dynamicRoleName = document.getElementById('dynamicRoleName');
-  const dynamicList = document.getElementById('dynamicList');
-  const rolePickSheet = document.getElementById('rolePickSheet');
-  const rolePickList = document.getElementById('rolePickList');
-
-  // 所有可用角色 = 所有对话列表里的角色去重（按名字+颜色）
-  function getAllRoles(){
-    const seen = new Set(), roles = [];
-    chatLists.forEach(list=>{
-      list.roles.forEach(r=>{
-        const key = r.name + '|' + r.color;
-        if(!seen.has(key)){ seen.add(key); roles.push(r); }
-      });
-    });
-    return roles;
-  }
-
-  function updateDynamicRoleUI(){
-    const role = getAllRoles().find(r=>r.id===dynamicRoleId);
-    if(role){
-      dynamicRoleDot.style.background = role.color;
-      dynamicRoleName.textContent = role.name;
-    } else {
-      dynamicRoleDot.style.background = '#ddd';
-      dynamicRoleName.textContent = '选择角色';
-    }
-  }
-
-  dynamicRoleBtn.addEventListener('click', ()=>{
-    const roles = getAllRoles();
-    if(roles.length===0){ showToast('请先在对话里创建角色'); return; }
-    let html = '';
-    roles.forEach(r=>{
-      html += `<button class="action-btn" data-role-id="${r.id}" style="display:flex;align-items:center;gap:10px;text-align:left;">
-        <span style="width:22px;height:22px;border-radius:50%;background:${r.color};border:2px solid white;flex-shrink:0;"></span>
-        <span>${escapeHtml(r.name)}</span>
-      </button>`;
-    });
-    rolePickList.innerHTML = html;
-    rolePickList.querySelectorAll('button').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        dynamicRoleId = btn.dataset.roleId;
-        updateDynamicRoleUI();
-        rolePickSheet.classList.remove('show');
-      });
-    });
-    rolePickSheet.classList.add('show');
-  });
-  document.getElementById('rolePickCancel').addEventListener('click', ()=>rolePickSheet.classList.remove('show'));
-
-  function renderDynamics(){
-    if(dynamics.length===0){
-      dynamicList.innerHTML = `<div class="empty-tip">还没有动态，发一条吧</div>`;
-      return;
-    }
-    const sorted = [...dynamics].sort((a,b)=>b.time - a.time);
-    let html = '';
-    sorted.forEach(d=>{
-      html += `<div class="dynamic-item" data-id="${d.id}">
-        <div class="dynamic-header">
-          <div class="dynamic-avatar" style="background:${d.roleColor};">${escapeHtml(d.roleName.charAt(0))}</div>
-          <div class="dynamic-meta">
-            <div class="dynamic-name">${escapeHtml(d.roleName)}</div>
-            <div class="dynamic-time">${formatRelativeTime(d.time)}</div>
-          </div>
-        </div>
-        <div class="dynamic-content">${escapeHtml(d.text)}</div>
-        <div class="dynamic-actions">
-          <button class="dynamic-action like-btn ${d.liked?'liked':''}" data-id="${d.id}">
-            ${d.liked?'已赞':'赞'} ${d.likes||0}
-          </button>
-          <button class="dynamic-action danger delete-btn" data-id="${d.id}">删除</button>
-        </div>
-      </div>`;
-    });
-    dynamicList.innerHTML = html;
-
-    dynamicList.querySelectorAll('.like-btn').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const d = dynamics.find(x=>x.id===btn.dataset.id);
-        if(!d) return;
-        d.liked = !d.liked;
-        d.likes = (d.likes||0) + (d.liked?1:-1);
-        if(d.likes<0) d.likes=0;
-        saveDynamics(); renderDynamics();
-      });
-    });
-    dynamicList.querySelectorAll('.delete-btn').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        showConfirm('删除这条动态？', ()=>{
-          dynamics = dynamics.filter(x=>x.id!==btn.dataset.id);
-          saveDynamics(); renderDynamics();
-        });
-      });
-    });
-  }
-
-  document.getElementById('publishBtn').addEventListener('click', ()=>{
-    const text = dynamicInput.value.trim();
-    if(!text){ showToast('写点什么吧'); return; }
-    if(!dynamicRoleId){ showToast('请先选择发布身份'); return; }
-    const role = getAllRoles().find(r=>r.id===dynamicRoleId);
-    if(!role){ showToast('角色不存在'); return; }
-    dynamics.push({
-      id:genId(), roleId:role.id, roleName:role.name, roleColor:role.color,
-      text, time:Date.now(), likes:0, liked:false
-    });
-    dynamicInput.value='';
-    saveDynamics(); renderDynamics();
-    showToast('已发布');
-  });
-
-  // ============================================================
-  // 模块三：日记
-  // ============================================================
-  let calendarYear, calendarMonth; // month 0-11
-  const calendarTitle = document.getElementById('calendarTitle');
-  const calendarGrid = document.getElementById('calendarGrid');
-  const diaryModal = document.getElementById('diaryModal');
-  const diaryModalTitle = document.getElementById('diaryModalTitle');
-  const diaryDateLabel = document.getElementById('diaryDateLabel');
-  const diaryInput = document.getElementById('diaryInput');
-  const moodPicker = document.getElementById('moodPicker');
-  const diaryDeleteBtn = document.getElementById('diaryDeleteBtn');
-  let editingDateKey = null;
-  let editingMood = MOODS[0].key;
-
-  function initCalendar(){
-    const now = new Date();
-    calendarYear = now.getFullYear();
-    calendarMonth = now.getMonth();
-  }
-
-  function renderCalendar(){
-    calendarTitle.textContent = `${calendarYear}年${calendarMonth+1}月`;
-    const firstDay = new Date(calendarYear, calendarMonth, 1).getDay();
-    const daysInMonth = new Date(calendarYear, calendarMonth+1, 0).getDate();
-    const daysInPrevMonth = new Date(calendarYear, calendarMonth, 0).getDate();
-    const todayStr = todayKey();
-
-    let html = '';
-    // 上月末尾
-    for(let i=firstDay-1; i>=0; i--){
-      html += `<div class="cal-day other-month">${daysInPrevMonth-i}</div>`;
-    }
-    // 本月
-    for(let d=1; d<=daysInMonth; d++){
-      const pad = n=>String(n).padStart(2,'0');
-      const key = `${calendarYear}-${pad(calendarMonth+1)}-${pad(d)}`;
-      const diary = diaries[key];
-      const isToday = key===todayStr;
-      const mood = diary ? MOODS.find(m=>m.key===diary.mood) : null;
-      let cls = 'cal-day';
-      if(isToday) cls += ' today';
-      if(diary) cls += ' has-diary';
-      html += `<div class="${cls}" data-date="${key}">
-        <span>${d}</span>
-        ${mood?`<span class="mood-dot" style="background:${mood.color};"></span>`:''}
-      </div>`;
-    }
-    // 下月开头补满6行
-    const total = firstDay + daysInMonth;
-    const rest = total % 7 === 0 ? 0 : 7 - (total % 7);
-    for(let i=1; i<=rest; i++){
-      html += `<div class="cal-day other-month">${i}</div>`;
-    }
-    calendarGrid.innerHTML = html;
-
-    calendarGrid.querySelectorAll('.cal-day[data-date]').forEach(cell=>{
-      cell.addEventListener('click', ()=> openDiaryEditor(cell.dataset.date));
-    });
-
-    // 图例
-    let legendHtml = '';
-    MOODS.forEach(m=>{
-      legendHtml += `<div class="legend-item"><span class="legend-dot" style="background:${m.color};"></span>${m.label}</div>`;
-    });
-    document.getElementById('diaryLegend').innerHTML = legendHtml;
-
-    // 日记列表（按日期倒序）
-    const keys = Object.keys(diaries).sort().reverse();
-    const diaryList = document.getElementById('diaryList');
-    if(keys.length===0){
-      diaryList.innerHTML = '';
-      return;
-    }
-    let listHtml = '';
-    keys.forEach(k=>{
-      const d = diaries[k];
-      const mood = MOODS.find(m=>m.key===d.mood) || MOODS[0];
-      listHtml += `<div class="diary-card" data-date="${k}">
-        <div class="diary-card-header">
-          <span class="diary-date">${k}</span>
-          <span class="diary-mood-tag" style="background:${mood.color};">${mood.label}</span>
-        </div>
-        <div class="diary-preview">${escapeHtml(d.text)}</div>
-      </div>`;
-    });
-    diaryList.innerHTML = listHtml;
-    diaryList.querySelectorAll('.diary-card').forEach(card=>{
-      card.addEventListener('click', ()=> openDiaryEditor(card.dataset.date));
-    });
-  }
-
-  function renderMoodPicker(){
-    let html = '';
-    MOODS.forEach(m=>{
-      html += `<div class="mood-item ${editingMood===m.key?'selected':''}" data-mood="${m.key}">
-        <div class="mood-color-circle" style="background:${m.color};"></div>
-        <div class="mood-label">${m.label}</div>
-      </div>`;
-    });
-    moodPicker.innerHTML = html;
-    moodPicker.querySelectorAll('.mood-item').forEach(item=>{
-      item.addEventListener('click', ()=>{
-        editingMood = item.dataset.mood;
-        renderMoodPicker();
-      });
-    });
-  }
-
-  function openDiaryEditor(dateKey){
-    editingDateKey = dateKey;
-    const existing = diaries[dateKey];
-    diaryModalTitle.textContent = existing ? '编辑日记' : '写日记';
-    diaryDateLabel.textContent = dateKey;
-    diaryInput.value = existing ? existing.text : '';
-    editingMood = existing ? existing.mood : MOODS[0].key;
-    diaryDeleteBtn.style.display = existing ? 'inline-block' : 'none';
-    renderMoodPicker();
-    diaryModal.classList.add('show');
-  }
-
-  document.getElementById('diaryCloseBtn').addEventListener('click', ()=>diaryModal.classList.remove('show'));
-  document.getElementById('diaryCancelBtn').addEventListener('click', ()=>diaryModal.classList.remove('show'));
-  document.getElementById('diarySaveBtn').addEventListener('click', ()=>{
-    const text = diaryInput.value.trim();
-    if(!text){ showToast('写点什么吧'); return; }
-    diaries[editingDateKey] = {
-      date: editingDateKey,
-      mood: editingMood,
-      text,
-      time: Date.now()
-    };
-    saveDiaries(); renderCalendar();
-    diaryModal.classList.remove('show');
-    showToast('已保存');
-  });
-  diaryDeleteBtn.addEventListener('click', ()=>{
-    showConfirm('删除这天的日记？', ()=>{
-      delete diaries[editingDateKey];
-      saveDiaries(); renderCalendar();
-      diaryModal.classList.remove('show');
-    });
-  });
-
-  document.getElementById('prevMonthBtn').addEventListener('click', ()=>{
-    calendarMonth--;
-    if(calendarMonth<0){ calendarMonth=11; calendarYear--; }
-    renderCalendar();
-  });
-  document.getElementById('nextMonthBtn').addEventListener('click', ()=>{
-    calendarMonth++;
-    if(calendarMonth>11){ calendarMonth=0; calendarYear++; }
-    renderCalendar();
-  });
-
-  // ============================================================
-  // 初始化
-  // ============================================================
-  function init(){
-    loadChats(); loadDynamics(); loadDiaries();
-    initCalendar();
-
-    // 无对话时给示例
-    if(chatLists.length===0){
-      const r1={id:genId(),name:'小明',color:'#E63946',isMain:true};
-      const r2={id:genId(),name:'小红',color:'#457B9D',isMain:false};
-      chatLists.push({
-        id:genId(), title:'小明、小红', roles:[r1,r2],
-        messages:[{id:genId(),senderId:r1.id,senderName:r1.name,text:'你好',time:nowTime()}]
-      });
-    }
-
-    renderChatList();
-    updateDynamicRoleUI();
-    renderCalendar();
-  }
-
-  init();
-})();
-</script>
+<script src="app.js"></script>
 </body>
 </html>
